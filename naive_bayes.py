@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.naive_bayes import GaussianNB
 class NaiveBayes:
     
     def __init__(self):
@@ -58,7 +59,14 @@ if __name__ == "__main__":
     
     model = NaiveBayes()
     model.fit(X,y)
+    skmodel = GaussianNB()
+    skmodel.fit(X,y)
     x_test = np.array([3.0, 0.85])
+    y_pred = skmodel.predict(x_test.reshape(1,-1))
+    y_score = skmodel.predict_proba(x_test.reshape(1,-1))
     res, winner = model.predict(x_test)
-    print(res)
-    print(winner)
+    print(f"My Model's Score: {res}")
+    print(f"My Model's Winner:{winner}")
+    print()
+    print(f"Sklearn score: {y_score}")
+    print(f"Sklearn Winner: {y_pred[0]}")
