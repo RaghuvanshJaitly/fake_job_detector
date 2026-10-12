@@ -15,7 +15,10 @@ class DBSCAN:
         #outer iter 2, inner iter 1 ends: [0, 0, -2, -2, -2]
         #outer iter 2, inner iter 2 ends: [0, 0, -2, -2, -2]
         #outer iter 2, inner iter 3 ends: [0, 0, 0, -2, -2]
-        ##outer iter 2, inner iter 4 ends: [0, 0, 0, 0, -2]
+        #outer iter 2, inner iter 4 ends: [0, 0, 0, 0, -2]
+        #iter 3:[0, 0, 0, 0, -2]
+        #iter 4: [0, 0, 0, 0, -2]
+        #outer iter 5: [0, 0, 0, 0, -1]
         self.labels = np.full(X.shape[0], -2)
         #starts as: [False, False, False, False, False]
         #iter1: [True, False, False, False, False]
@@ -24,6 +27,9 @@ class DBSCAN:
         #iter 2: inner iter2 [True, True, False, False, False]
         #iter 2: inner iter3 [True, True, True, False, False]
         #iter 2: inner iter4 [True, True, True, True, False]
+        #iter 3: [True, True, True, True, False]
+        #iter 4: [True, True, True, True, False]
+        #outer iter 5: [True, True, True, True, True]
         self.visited = np.full(X.shape[0], False)
         #starts as : 0
         self.cluster_ids = 0
@@ -31,6 +37,9 @@ class DBSCAN:
         for i in range(len(X)):
             #iter 1: marks [0,0] as visited
             #iter 2: marks [1, 0] as visited
+            #iter 3: [2,0] is already visited, so we continue to next iteration
+            #iter 4: [3, 0] is already visited so we continue to next iteration
+            #iter 5: [7, 0] is not visited so we mark it as visited
             if not(self.visited[i]):
                 self.visited[i] = True
                 #iter 1(0): helper caclulates e dist of (0,0) with all other points including itself and returns 
@@ -38,9 +47,14 @@ class DBSCAN:
                 
                 #iter 2(1): helper caclulates e dist of (1,0) with all other points including itself and returns 
                 #the idx of pts that satisfy eps, in this case it returns [0, 1, 2] -> [0,0], [1,0] and [2,0]
+                
+                #iter 5(4): helper caclulates e dist of (7,0) with all other points including itself and returns 
+                #the idx of pts that satisfy eps, in this case it returns [4] -> [7,0]
+                
                 satisfy_eps_idx = self.calc_edist_neighbour(X, i)
                 #iter 1: True, len(satisfy_eps_idx) is 2, we set (0,0) to noise for now with -1, and we go back to the top for iter 2
                 #iter 2: False, len(satisfy_eps_ids) is 3, so we jump to else
+                #iter 5: True, len(satisfy_eps_idx) is 1 so we set (7,0) to noise, and our loop is done
                 if len(satisfy_eps_idx) < self.min_samples:
                     self.labels[i] = -1
                 else:
@@ -99,6 +113,8 @@ class DBSCAN:
                         #iter 2, inner iter 4: pos counter = 4
                         position_counter += 1
                     #iter 2 ends, cluster id = 1
+                    #iter 3, cluster id = 1
+                    #iter 4, cluster id = 1
                     self.cluster_ids += 1
                                     
         return self.labels
@@ -122,4 +138,3 @@ if __name__ == "__main__":
         [3,0],
         [7,0]]) # isolated
     print(model.fit(X))
-    print(model.calc_edist_neighbour(X, 3))
