@@ -43,4 +43,5 @@ if __name__ == "__main__":
         [8.5, 9.0],
         [9.0, 8.5],])
     print(X)
+    model.fit(X)
     print(model.predict(X))

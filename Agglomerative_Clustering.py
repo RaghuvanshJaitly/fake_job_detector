@@ -45,4 +45,3 @@ if __name__ == "__main__":
     X = np.array([[0], [1], [5], [6], [12]])
     model = AgglomerativeClustering(2)
     print(model.fit_predict(X))
-    
