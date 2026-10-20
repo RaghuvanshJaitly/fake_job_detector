@@ -16,26 +16,29 @@ X = data['text']
 y = data['fraudulent']
 
 # split into train and test
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=42, stratify=y)
+X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.40, random_state=42, stratify=y)
+X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.50, random_state=42, stratify=y_temp )
+
 vectorizer = CountVectorizer()
 tfidf_vectorizer = TfidfVectorizer()
+
 X_train_counts = vectorizer.fit_transform(X_train)
-X_test_counts = vectorizer.transform(X_test)
+X_val_counts = vectorizer.transform(X_val)
 X_train_counts_tf = tfidf_vectorizer.fit_transform(X_train)
-X_test_counts_tf = tfidf_vectorizer.transform(X_test)
+X_val_counts_tf = tfidf_vectorizer.transform(X_val)
 #initialize model
 model = MultinomialNB()
-model2 = MultinomialNB(alpha=0.1)
+model2 = MultinomialNB(alpha=0.001)
 model.fit(X_train_counts, y_train)
-labels = model.predict(X_test_counts)
+labels = model.predict(X_val_counts)
 model2.fit(X_train_counts_tf, y_train)
-labels2 = model2.predict(X_test_counts_tf)
+labels2 = model2.predict(X_val_counts_tf)
 
 #confusion matrix
-cm = confusion_matrix(y_test, labels)
-cm2 = confusion_matrix(y_test, labels2)
-print(classification_report(y_test, labels))
-print(classification_report(y_test, labels2))
+cm = confusion_matrix(y_val, labels)
+cm2 = confusion_matrix(y_val, labels2)
+print(classification_report(y_val, labels))
+print(classification_report(y_val, labels2))
 #plot the matrix
 disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["Legitimate", "Fraudulent"])
 disp2 = ConfusionMatrixDisplay(confusion_matrix=cm2, display_labels=["Legitimate", "Fraudulent"])
