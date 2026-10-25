@@ -198,3 +198,46 @@ Keep TF-IDF with alpha 0.001 as the working baseline.
 Inspect 10–15 false negatives: postings where y_val is 1 but the model predicted 0. Compare them with some correctly detected fraudulent postings.
 
 Look for recurring differences, such as text length, missing company information, or wording. Use those observations to choose the next experiment.
+
+---
+
+# Experiment 4: Keeping identical descriptions together when splitting
+
+## Problem:
+
+Some validation postings shared their exact descriptions with training postings. Our existing duplicate removal missed these because their titles differed.
+
+## Change:
+
+Created group IDs from descriptions and used GroupShuffleSplit for both splitting stages. Identical descriptions now stay within one split. Model settings remained unchanged.
+
+## Dataset sizes:
+
+- Training: 9,642 postings, including 416 fraudulent.
+- Validation: 3,218 postings, including 152 fraudulent.
+- Test: 3,206 postings, including 150 fraudulent.
+
+## Validation results for the fraudulent class:
+
+| Model | Precision | Recall | F1 |
+|---|---:|---:|---:|
+| Counts, alpha 1.0 | 0.86 | 0.28 | 0.43 |
+| TF-IDF, alpha 0.001 | 0.94 | 0.52 | 0.67 |
+
+## What the results mean:
+
+- Approximately 94% of the TF-IDF model’s fraud flags were correct.
+- It detected approximately 52% of actual fraudulent postings.
+- It still missed approximately 48% of fraud.
+- TF-IDF performed better than the counts model on all three fraud metrics.
+
+## What I learned:
+
+- Different rows can contain the same description, even after removing duplicates from combined text.
+- Group-based splitting prevents exact descriptions from appearing across different splits.
+- The previous TF-IDF results were precision 0.88, recall 0.53, and F1 0.66. These are not directly comparable with the new results because the training and validation examples changed.
+- This addresses exact-description overlap; it does not guarantee that all similar templates are separated.
+
+## Current decision:
+
+Use TF-IDF with alpha 0.001 as the baseline for future experiments on this group-based split. Continue evaluating changes on validation data and reserve the test set for final evaluation.
