@@ -292,3 +292,50 @@ Keep 0.30 as the best threshold tested so far by validation fraud F1.
 
 Try threshold 0.20, keeping everything else unchanged.
 Compare fraud precision, recall, F1, and false alarms.
+
+---
+
+# Experiment 6: Lowering the fraud threshold to 0.20
+
+## Change:
+
+Lowered the decision threshold from 0.30 to 0.20.
+Kept TF-IDF, alpha 0.001, and the group-based split unchanged.
+
+## Evaluation:
+
+Same validation set: 3,066 legitimate and 152 fraudulent postings.
+Test data remained unused.
+
+## Results for the fraudulent class:
+
+| Threshold | Precision | Recall | F1 | Fraud caught | Fraud missed |
+|---|---:|---:|---:|---:|---:|
+| 0.50 | 0.94 | 0.52 | 0.67 | 79 | 73 |
+| 0.30 | 0.92 | 0.59 | 0.72 | 90 | 62 |
+| 0.20 | 0.91 | 0.64 | 0.75 | 97 | 55 |
+
+## What changed compared with threshold 0.30:
+
+- Caught 7 additional fraudulent postings.
+- Recall increased from approximately 59% to 64%.
+- Precision decreased from approximately 92% to 91%.
+- F1 increased from 0.72 to 0.75.
+- The scores and rounded report imply 10 false alarms, compared with 8 previously. Confirm these counts in the confusion matrices.
+
+## What I learned:
+
+Lowering the threshold improved fraud detection while slightly reducing the reliability of fraud flags.
+
+Approximately 91% of flagged postings were fraudulent, but the model still missed approximately 36% of actual fraud.
+
+These results support threshold 0.20 on this validation set; they do not establish that it is optimal.
+
+## Current decision:
+
+Keep 0.20 as the best threshold tested so far by validation fraud F1.
+
+## Next experiment:
+
+Try threshold 0.10, keeping everything else unchanged.
+Check whether additional fraud detection justifies the increase in false alarms.
