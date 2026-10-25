@@ -339,3 +339,71 @@ Keep 0.20 as the best threshold tested so far by validation fraud F1.
 
 Try threshold 0.10, keeping everything else unchanged.
 Check whether additional fraud detection justifies the increase in false alarms.
+
+---
+
+# Experiment 7: Lowering the fraud threshold to 0.10
+
+## Goal:
+
+Check whether catching more fraudulent postings justifies additional false alarms.
+
+## Change:
+
+Lowered the decision threshold from 0.20 to 0.10.
+Kept TF-IDF, alpha 0.001, and the group-based split unchanged.
+
+Postings with a fraud score of at least 0.10 are now flagged as fraudulent.
+The model’s learned parameters and scores remained unchanged.
+
+## Evaluation:
+
+Same validation set: 3,066 legitimate and 152 fraudulent postings.
+Test data remained unused.
+
+## Results for the fraudulent class:
+
+| Threshold | Precision | Recall | F1 | Fraud caught | Fraud missed |
+|---|---:|---:|---:|---:|---:|
+| 0.50 | 0.94 | 0.52 | 0.67 | 79 | 73 |
+| 0.30 | 0.92 | 0.59 | 0.72 | 90 | 62 |
+| 0.20 | 0.91 | 0.64 | 0.75 | 97 | 55 |
+| 0.10 | 0.88 | 0.69 | 0.77 | 105 | 47 |
+
+## What changed compared with threshold 0.20:
+
+- Caught 8 additional fraudulent postings.
+- Recall increased from approximately 64% to 69%.
+- Precision decreased from approximately 91% to 88%.
+- F1 increased from 0.75 to 0.77.
+
+## What the results mean:
+
+- Approximately 88% of fraud flags were correct.
+- Approximately 12% of fraud flags were false alarms.
+- The detector caught 105 of the 152 fraudulent postings.
+- It still missed 47 fraudulent postings, approximately 31% of actual fraud.
+- Exact false-alarm counts should be read from the confusion matrix.
+
+## What I learned:
+
+Threshold tuning changes how scores become decisions. It does not improve the model’s learned understanding of the text.
+
+Lowering the threshold caught more fraud while reducing the reliability of fraud flags.
+
+Threshold 0.10 achieved the highest validation fraud F1 tested so far. This does not establish that it is optimal or suitable for every use case.
+
+## Current decision:
+
+Keep TF-IDF with alpha 0.001 and threshold 0.10 as the working baseline.
+
+Treat flagged postings as candidates for review.
+Continue reserving the test set for final evaluation.
+
+## Next step:
+
+Pause threshold tuning.
+
+Inspect 10–15 of the remaining false negatives and several false positives to identify patterns that could guide changes to features or the model.
+
+Use the predictions from threshold 0.10 when selecting these errors, rather than the original predictions stored in labels2.
