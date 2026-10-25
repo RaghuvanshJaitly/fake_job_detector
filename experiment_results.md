@@ -241,3 +241,54 @@ Created group IDs from descriptions and used GroupShuffleSplit for both splittin
 ## Current decision:
 
 Use TF-IDF with alpha 0.001 as the baseline for future experiments on this group-based split. Continue evaluating changes on validation data and reserve the test set for final evaluation.
+
+---
+
+# Experiment 5: Lowering the fraud decision threshold to 0.30
+
+## Goal:
+
+Catch more fraudulent postings that the model previously classified as legitimate.
+
+## Change:
+
+Lowered the decision threshold from 0.50 to 0.30.
+Kept TF-IDF, alpha 0.001, and the group-based split unchanged.
+
+The model’s scores stayed the same. Only the rule for converting scores into predictions changed.
+
+## Evaluation:
+
+Same validation set: 3,066 legitimate and 152 fraudulent postings.
+Test data remained unused.
+
+## Results for the fraudulent class:
+
+| Threshold | Precision | Recall | F1 | Fraud caught | Fraud missed |
+|---|---:|---:|---:|---:|---:|
+| 0.50 | 0.94 | 0.52 | 0.67 | 79 | 73 |
+| 0.30 | 0.92 | 0.59 | 0.72 | 90 | 62 |
+
+## What the results mean:
+
+- We caught 11 additional fraudulent postings.
+- Recall increased from approximately 52% to 59%.
+- Precision decreased from approximately 94% to 92%.
+- F1 increased from 0.67 to 0.72.
+- With 90 frauds caught, the rounded precision implies 8 false alarms, compared with 5 previously. Confirm this in the confusion matrix.
+- We still missed 62 of the 152 fraudulent postings.
+
+## What I learned:
+
+Lowering the threshold can catch more fraud, but can also flag more legitimate postings.
+
+In this experiment, fraud recall and F1 improved. The threshold does not change what the model learned.
+
+## Current decision:
+
+Keep 0.30 as the best threshold tested so far by validation fraud F1.
+
+## Next experiment:
+
+Try threshold 0.20, keeping everything else unchanged.
+Compare fraud precision, recall, F1, and false alarms.

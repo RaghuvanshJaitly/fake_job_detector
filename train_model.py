@@ -49,17 +49,26 @@ model.fit(X_train_counts, y_train)
 labels = model.predict(X_val_counts)
 model2.fit(X_train_counts_tf, y_train)
 labels2 = model2.predict(X_val_counts_tf)
-
+prob = model2.predict_proba(X_val_counts_tf)
+pos_prob = prob[:, 1]
+false_neg = (y_val == 1) & (labels2 == 0)
+print(pos_prob[false_neg])
+new_predictions = pos_prob >= 0.30
 #confusion matrix
 cm = confusion_matrix(y_val, labels)
 cm2 = confusion_matrix(y_val, labels2)
+cm3 = confusion_matrix(y_val, new_predictions)
 print("\tCount Vectorizer\n")
 print(classification_report(y_val, labels))
 print("\tTFID Vectorizer\n")
 print(classification_report(y_val, labels2))
+print("\tTFID Vectorizer with 0.30 threshold\n")
+print(classification_report(y_val, new_predictions))
 #plot the matrix
 disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["Legitimate", "Fraudulent"])
 disp2 = ConfusionMatrixDisplay(confusion_matrix=cm2, display_labels=["Legitimate", "Fraudulent"])
+disp3 = ConfusionMatrixDisplay(confusion_matrix=cm3,display_labels=["Legitimate", "Fraudulent"])
 disp.plot()
 disp2.plot()
+disp3.plot()
 plt.show()
