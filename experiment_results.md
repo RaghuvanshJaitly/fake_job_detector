@@ -407,3 +407,41 @@ Pause threshold tuning.
 Inspect 10–15 of the remaining false negatives and several false positives to identify patterns that could guide changes to features or the model.
 
 Use the predictions from threshold 0.10 when selecting these errors, rather than the original predictions stored in labels2.
+
+# Project Update — November 3, 2026
+Refactored the training workflow and saved the trained model so it can later be loaded by a separate prediction script.
+
+## Changes made
+
+- Created `pipeline.py` with a `build_pipeline()` function that returns a fresh, untrained scikit-learn pipeline containing TF-IDF and Multinomial Naive Bayes with alpha `0.001`.
+- Updated `train_model.py` to fit the pipeline using the original training text and generate validation predictions and scores. TF-IDF transformations now happen inside the pipeline.
+- Removed the CountVectorizer comparison from the active training script and cleaned up unused imports.
+- Kept the existing data preparation, description-based group splits, and selected threshold of `0.10`.
+- Updated the false-negative mask to use predictions from the `0.10` threshold, so it identifies fraud missed by the selected decision rule.
+- Saved the fitted pipeline and threshold together in `fake_job_detector.joblib` using joblib. The saved dictionary contains the keys `pipeline` and `threshold`.
+
+## Validation check
+
+Reran training on the same group-based split. The reported fraud metrics matched the previous baseline at the displayed precision:
+
+| Decision threshold | Precision | Recall | F1 |
+|---|---:|---:|---:|
+| Default rule, approximately 0.50 | 0.94 | 0.52 | 0.67 |
+| Selected threshold, 0.10 | 0.88 | 0.69 | 0.77 |
+
+Validation contained 3,066 legitimate and 152 fraudulent postings. The test set remained unused. This check supports that the refactor preserved the reported validation performance.
+
+## What I learned
+
+- A pipeline connects preprocessing and classification. Fitting it learns the TF-IDF vocabulary and weights and trains Naive Bayes; prediction reuses that learned state.
+- Model persistence means saving the fitted objects, including what they learned. The joblib file is binary and is intended to be loaded by Python.
+- The threshold changes how scores become final predictions. It does not change the trained parameters or the scores themselves.
+- Saving a threshold beside the pipeline does not automatically change its default `predict` behavior. Prediction code must apply the saved threshold to the fraud scores.
+
+## Next step
+
+- Use the same threshold variable for both evaluation and saving, replacing the remaining hardcoded cutoff.
+- Load the saved file in a separate prediction script.
+- Verify that scores and threshold-based predictions match those produced before saving.
+
+Loading and prediction verification have not been completed yet.
