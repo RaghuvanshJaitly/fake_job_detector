@@ -4,6 +4,8 @@ from sklearn.model_selection import GroupShuffleSplit
 from sklearn.metrics import confusion_matrix, classification_report, ConfusionMatrixDisplay
 from pipeline import build_pipeline
 import joblib
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.linear_model import LogisticRegression
 
 threshold = 0.10
 #Get data
@@ -35,30 +37,39 @@ X_test = X_temp.iloc[test_pos]
 y_val = y_temp.iloc[val_pos]
 y_test = y_temp.iloc[test_pos]
 
-model_pipeline = build_pipeline()
-model_pipeline.fit(X_train, y_train)
-labels = model_pipeline.predict(X_val)
-prob = model_pipeline.predict_proba(X_val)
-model_artifact = {"pipeline": model_pipeline, "threshold": threshold}
+multinomial_model = MultinomialNB(alpha=0.001)
+logistic_model = LogisticRegression()
+
+model_pipeline_mb = build_pipeline(multinomial_model)
+model_pipeline_logistic = build_pipeline(logistic_model)
+model_pipeline_mb.fit(X_train, y_train)
+model_pipeline_logistic.fit(X_train, y_train)
+labels_mb = model_pipeline_mb.predict(X_val)
+labels_logistic = model_pipeline_logistic.predict(X_val)
+prob_mb = model_pipeline_mb.predict_proba(X_val)
+prob_logistic = model_pipeline_logistic.predict_proba(X_val)
+
+model_artifact = {"pipeline": model_pipeline_mb, "threshold": threshold}
 joblib.dump(model_artifact, 'fake_job_detector.joblib')
 
-pos_prob = prob[:, 1]
-new_predictions = pos_prob >= threshold
-false_neg = (y_val == 1) & (new_predictions== 0)
-print(pos_prob[false_neg])
+pos_prob_mb = prob_mb[:, 1]
+pos_prob_logistic = prob_logistic[:, 1]
+mb_predictions = pos_prob_mb >= threshold
+false_neg = (y_val == 1) & (mb_predictions== 0)
+logistic_predictions = pos_prob_logistic >= threshold
 
 #confusion matrix
+cm_mb = confusion_matrix(y_val, mb_predictions)
+cm_logistic = confusion_matrix(y_val, logistic_predictions)
 
-cm2 = confusion_matrix(y_val, labels)
-cm3 = confusion_matrix(y_val, new_predictions)
-print("\tTFID Vectorizer\n")
-print(classification_report(y_val, labels))
-print(f"\tTFID Vectorizer with {threshold} threshold\n")
-print(classification_report(y_val, new_predictions))
+print(f"\tTFID Vectorizer Multinomial NB with {threshold} threshold\n")
+print(classification_report(y_val, mb_predictions))
+print(f"\tTFID Vectorizer Logistic regression with {threshold} threshold\n")
+print(classification_report(y_val, logistic_predictions))
+
 #plot the matrix
-
-disp2 = ConfusionMatrixDisplay(confusion_matrix=cm2, display_labels=["Legitimate", "Fraudulent"])
-disp3 = ConfusionMatrixDisplay(confusion_matrix=cm3,display_labels=["Legitimate", "Fraudulent"])
-disp2.plot()
-disp3.plot()
+display_mb = ConfusionMatrixDisplay(confusion_matrix=cm_mb, display_labels=["Legitimate", "Fraudulent"])
+display_logistic = ConfusionMatrixDisplay(confusion_matrix=cm_logistic, display_labels=["Legitimate", "Fraudulent"])
+display_mb.plot()
+display_logistic.plot()
 plt.show()
