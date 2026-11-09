@@ -1,3 +1,5 @@
 /venv
 practice.py
 practice_clustering.py
+__pycache__/
+*.pyc

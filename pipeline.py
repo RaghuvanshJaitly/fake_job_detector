@@ -7,5 +7,4 @@ def build_pipeline():
                       ('MultinomialNB', MultinomialNB(alpha=0.001))]
     
     model_pipeline = Pipeline(pipeline_steps)
-    
     return model_pipeline
