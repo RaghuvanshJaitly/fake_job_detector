@@ -1,8 +1,6 @@
 import numpy as np
 from predict import predict_postings
 
-
-
 class FakePostingModel:
     def predict_proba(self, postings):
         return np.array([
