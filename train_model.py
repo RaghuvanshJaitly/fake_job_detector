@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import GroupShuffleSplit
-from sklearn.metrics import confusion_matrix, classification_report, ConfusionMatrixDisplay, average_precision_score
+from sklearn.metrics import confusion_matrix, classification_report, ConfusionMatrixDisplay, average_precision_score, PrecisionRecallDisplay
 from pipeline import build_pipeline
 import joblib
 from sklearn.naive_bayes import MultinomialNB
@@ -88,8 +88,23 @@ def main():
 
     display_logistic.plot(ax=axes[1])
     axes[1].set_title("Logistic Regression")
-
     plt.tight_layout()
+    
+    pr_fig, pr_ax = plt.subplots(figsize=(7,5))
+    PrecisionRecallDisplay.from_predictions(
+        y_val,
+        pos_prob_mb,
+        name="Multinomial NB",
+        ax=pr_ax,
+    )
+    PrecisionRecallDisplay.from_predictions(
+        y_val,
+        pos_prob_logistic,
+        name="Logistic Regression",
+        ax=pr_ax,
+    )
+    pr_ax.set_title("Validation precision-recall curves")
+    pr_fig.tight_layout()
     plt.show()
     
 if __name__ == "__main__":
