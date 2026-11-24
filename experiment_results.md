@@ -445,3 +445,34 @@ Validation contained 3,066 legitimate and 152 fraudulent postings. The test set 
 - Verify that scores and threshold-based predictions match those produced before saving.
 
 Loading and prediction verification have not been completed yet.
+
+# Experiment 8 — Comparing Naive Bayes and logistic regression at the same review budget
+
+November 24, 2026
+
+## Goal
+
+If I can review only 119 job postings, which model puts more actual fraud in front of me?
+
+I chose 119 because that’s how many validation postings the existing Naive Bayes model flagged at its `0.10` threshold. At that same threshold, logistic regression flagged 212 postings and caught 127 frauds. Comparing the top 119 from each model lets me see which one catches more fraud for the same amount of review work.
+
+## What I changed
+
+I added `evaluate_at_k` to `evaluation.py` and called it from `train_model.py` for both trained TF-IDF models. Each model scored all 3,218 validation postings. The function ranked them by fraud score, selected the top 119, and checked their true labels. There were 152 fraudulent postings in the validation set.
+
+I also added a unit test with four unsorted scores. With `k=2`, the two highest-scoring postings contained one fraud and one legitimate posting. The test passed with the expected counts, precision, and recall.
+
+## Validation results
+
+| Model | Postings reviewed | Fraud caught | False alarms | Precision@119 | Recall@119 |
+|---|---:|---:|---:|---:|---:|
+| Multinomial Naive Bayes (`alpha=0.001`) | 119 | 105 | 14 | 88.2% | 69.1% |
+| Logistic regression | 119 | 98 | 21 | 82.4% | 64.5% |
+
+## What I learned
+
+At the same review budget, Naive Bayes caught 7 more fraudulent postings and produced 7 fewer false alarms. Its precision tells me that 105 of the 119 postings I would review were fraud. Its recall tells me that those same 105 postings accounted for 69.1% of all 152 frauds, leaving 47 outside the review queue.
+
+## Current decision
+
+Keep Multinomial Naive Bayes as the baseline for prioritizing postings for review. It performed better at `k=119` on this validation split. I’m reserving the held-out test set for the final evaluation.

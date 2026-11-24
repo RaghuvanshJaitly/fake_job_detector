@@ -6,6 +6,7 @@ from pipeline import build_pipeline
 import joblib
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
+from evaluation import evaluate_at_k
 
 def prepare_data(data: pd.DataFrame):
     df = data.copy()
@@ -63,6 +64,15 @@ def main():
     mb_predictions = pos_prob_mb >= threshold
     logistic_predictions = pos_prob_logistic >= threshold
 
+    # Compare how many actual frauds each model catches when we
+    # review only its top k highest-scoring postings.
+    k = 119
+    result_mb = evaluate_at_k(y_val, pos_prob_mb, k)
+    result_logistic = evaluate_at_k(y_val, pos_prob_logistic, k)
+    
+    print(f"Multinomial Naive Bayes (evaluate k postings): {result_mb}")
+    print(f"Logistic Regression (evaluate k postings): {result_logistic}")
+    
     #average precision scores
     avg_precision_nb = average_precision_score(y_val, pos_prob_mb)
     avg_precision_logistic = average_precision_score(y_val, pos_prob_logistic)
